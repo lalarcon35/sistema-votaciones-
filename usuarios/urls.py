@@ -7,5 +7,8 @@ urlpatterns =  [
     path('registro/', views.registro, name='registro'),
      # RF-02 inicio y cierre de sesion
     path('login/', LoginView.as_view(template_name='usuarios/login.html'),name='login'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout')
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+     #Rutas para redirigir a pagina de inicio y cierre de sesion
+    path('inicio/', views.inicio, name='inicio'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]

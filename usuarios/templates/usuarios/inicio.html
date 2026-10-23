@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIENVENIDO AL SISTEMA</title>
+</head>
+<body style="font-family: Arial, sans-serif; text-align: center; margin: top 50px;">
+
+    <h1>¡Bienvenido {{user.first_name}} {{user.last_name}}!</h1>
+    
+    <form action="{%url 'logout' %}" method="post" style="margin-top:30px;">
+        {% csrf_token %}
+        <button type="submit" style="padding:10px 20px; background-color:#dc3545; color:white; border:none; border-radius:5px; cursor: pointer;">
+            Cerrar sesión
+        </button>
+    </form>
+    
+</body>
+</html>
