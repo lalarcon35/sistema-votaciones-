@@ -1,12 +1,139 @@
-
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de sesion</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Iniciar sesión | Leyenda Vallenata</title>
+  <!-- Conexión a tu archivo CSS estático -->
+  <link rel="stylesheet" href="{% static 'usuarios/login.css' %}">
 </head>
 <body>
+    <header class="encabezado">
+      <a class="marca" href="#" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+  
+      <nav class="acciones" aria-label="Navegación principal">
+        <a class="boton boton--principal" href="#formulario-login">Iniciar sesión</a>
+        <!-- Enlace dinámico a la página de registro -->
+        <a class="boton boton--secundario" href="{% url 'registro' %}">Crear cuenta</a>
+      </nav>
+    </header>
+  
+    <main class="contenido">
+      <section class="identidad" aria-label="Fundación Festival de la Leyenda Vallenata">
+        <!-- Conexión a tu imagen estática (asegúrate de guardarla junto a tu login.css) -->
+        <img
+          class="identidad__logo"
+          src="{% static 'usuarios/logo-blue-1.png' %}"
+          alt="Fundación Festival de la Leyenda Vallenata. Patrimonio Cultural de la Nación"
+        >
+      </section>
+  
+      <section class="panel-login" id="formulario-login" aria-labelledby="titulo-login">
+        <div class="panel-login__encabezado">        
+          <h1 id="titulo-login">Iniciar sesión</h1>
+          <p class="introduccion">Qué bueno tenerte de vuelta. Accede con tus datos.</p>
+        </div>
+  
+        <!-- El form ahora procesa los datos en Django -->
+        <form class="formulario" method="post">
+          {% csrf_token %}
+  
+          <!-- Bloque para mostrar mensajes de error si las credenciales son incorrectas -->
+          {% if form.errors %}
+            <div style="color: #d9534f; background-color: #fdf7f7; border: 1px solid #d9534f; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px;">
+              Usuario o contraseña incorrectos. Por favor intenta de nuevo.
+            </div>
+          {% endif %}
+  
+          <div class="campo">
+            <label for="correo">Usuario / Correo electrónico</label>
+            <!-- NOTA: Django exige que el name sea "username" para el inicio de sesión por defecto -->
+            <input
+              id="correo"
+              name="username"
+              type="text"
+              autocomplete="username"
+              required
+            >
+          </div>
+  
+          <div class="campo">
+            <div class="campo__fila">
+              <label for="contrasena">Contraseña</label>
+              <button class="mostrar" type="button" aria-controls="contrasena" aria-pressed="false">
+                <svg viewBox="0 0 20 20" aria-hidden="true" style="width: 20px; height: 20px; fill: currentColor;">
+                  <path d="M2 10s2.8-5 8-5 8 5 8 5-2.8 5-8 5-8-5-8-5Z"/>
+                  <circle cx="10" cy="10" r="2.2"/>
+                </svg>
+                <span>Mostrar</span>
+              </button>
+            </div>
+            <!-- NOTA: Django exige que el name sea "password" -->
+            <input
+              id="contrasena"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+  
+          <p class="recuperar"><a href="#recuperar">¿Olvidaste tu contraseña?</a></p>
+          
+          <button class="enviar" type="submit">
+            <span>Iniciar sesión</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true" style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;">
+              <path d="M4 10h11m-5-5 5 5-5 5"/>
+            </svg>
+          </button>
+        </form>
+  
+        <p class="registro" id="crear-cuenta">
+          ¿Aún no tienes una cuenta?
+          <a href="{% url 'registro' %}">Crear cuenta</a>
+        </p>
+      </section>
+    </main>
+  
+    <footer class="pie">
+      <a class="marca marca--pie" href="#" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+      <div class="pie__legal">
+        <span>Festival de la Leyenda Vallenata</span>
+        <span>Contenido ilustrativo. Sin vinculación oficial.</span>
+      </div>
+    </footer>
+  
+    <script>
+      const botonMostrar = document.querySelector(".mostrar");
+      const campoContrasena = document.querySelector("#contrasena");
+  
+      botonMostrar.addEventListener("click", () => {
+        const mostrar = campoContrasena.type === "password";
+        campoContrasena.type = mostrar ? "text" : "password";
+        botonMostrar.setAttribute("aria-pressed", String(mostrar));
+        botonMostrar.querySelector("span").textContent = mostrar ? "Ocultar" : "Mostrar";
+      });
+    </script>
+  </body>
+<!--<body>
     <h2>Iniciar sesion - sistema de votaciones</h2>
     <form method="post">
         {% csrf_token %}
@@ -15,6 +142,6 @@
     </form>
     <p>¿No tienes una cuenta <a href="{%url 'registro'%}">resgistrate aqui</a>?</p>
     
-</body>
+</body>-->
 </html>
 

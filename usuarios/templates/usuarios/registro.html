@@ -1,12 +1,176 @@
-
+{% csrf_token %}
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Crear cuenta | Leyenda Vallenata</title>
+  <!-- Conexión a tu archivo CSS estático -->
+  <link rel="stylesheet" href="{% static 'usuarios/registro.css' %}">
 </head>
 <body>
+    <header class="encabezado">
+      <a class="marca" href="#" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+  
+      <nav class="acciones" aria-label="Navegación principal">
+        <!-- Enlace dinámico a la página de login -->
+        <a class="boton boton--secundario" href="{% url 'login' %}">Iniciar sesión</a>
+        <a class="boton boton--principal" href="#formulario-registro">Crear usuario</a>
+      </nav>
+    </header>
+  
+    <main class="contenido">
+      <section class="identidad" aria-label="Fundación Festival de la Leyenda Vallenata">
+        <!-- Conexión a tu imagen estática -->
+        <img
+          class="identidad__logo"
+          src="{% static 'usuarios/logo-blue-1.png' %}"
+          alt="Fundación Festival de la Leyenda Vallenata. Patrimonio Cultural de la Nación"
+        >
+      </section>
+  
+      <section class="panel-registro" id="formulario-registro" aria-labelledby="titulo-registro">
+        <header class="panel-registro__encabezado">
+          <h1 id="titulo-registro">Crear cuenta</h1>
+          <p class="introduccion">Completa tus datos para comenzar.</p>
+        </header>
+  
+        <!-- El formulario ahora envía los datos por POST a la vista de Django -->
+        <!-- El formulario ahora envía los datos por POST a la vista de Django -->
+      <form class="formulario" method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alerta-error">
+            <strong>Revisa los siguientes campos:</strong>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; text-align: left;">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li><b>{{ field }}</b>: {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <div class="campos-nombre">
+          <div class="campo">
+            <label for="nombres">Nombres</label>
+            <input id="nombres" name="first_name" type="text" autocomplete="given-name" required>
+          </div>
+
+          <div class="campo">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" name="last_name" type="text" autocomplete="family-name" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="documento">Número de identificación</label>
+          <input id="documento" name="documento" type="text" inputmode="numeric" autocomplete="off" required>
+        </div>
+
+        <div class="campo">
+            <label for="telefono">Teléfono (Opcional)</label>
+            <input 
+              id="telefono" 
+              name="telefono" 
+              type="tel" 
+              autocomplete="tel"
+            >
+          </div>
+
+        <div class="campo">
+          <label for="correo">Correo electrónico</label>
+          <!-- Ajustado para coincidir con forms.EmailField de tu Python -->
+          <input id="correo" name="email" type="email" inputmode="email" autocomplete="email" required>
+        </div>
+
+        <div class="campo">
+          <div class="campo__fila">
+            <label for="contrasena">Contraseña</label>
+            <button class="mostrar" type="button" aria-controls="contrasena" aria-pressed="false">
+              <svg viewBox="0 0 20 20" aria-hidden="true" style="width: 20px; height: 20px; fill: currentColor;">
+                <path d="M2 10s2.8-5 8-5 8 5 8 5-2.8 5-8 5-8-5-8-5Z"/>
+                <circle cx="10" cy="10" r="2.2"/>
+              </svg>
+              <span>Mostrar</span>
+            </button>
+          </div>
+          <input id="contrasena" name="password" type="password" autocomplete="new-password" required>
+          <small class="ayuda">Sugerencia: al menos 8 caracteres, con letras y números.</small>
+        </div>
+
+        <!-- NUEVO: Campo de confirmación exigido por tu forms.py -->
+        <div class="campo">
+          <label for="password_confirm">Confirmar contraseña</label>
+          <input id="password_confirm" name="password_confirm" type="password" autocomplete="new-password" required>
+        </div>
+        
+        
+
+        <!-- El campo 'telefono' lo omitimos en el HTML porque en tu forms.py dice required=False -->
+
+        <button class="enviar" type="submit">
+          <span>Crear cuenta</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true" style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;">
+            <path d="M4 10h11m-5-5 5 5-5 5"/>
+          </svg>
+        </button>
+      </form>
+        <p class="privacidad">
+          Privacidad: formulario de muestra. No introduzcas datos personales reales en esta propuesta conceptual.
+        </p>
+  
+        <p class="iniciar">
+          ¿Ya tienes una cuenta?
+          <a href="{% url 'login' %}">Iniciar sesión</a>
+        </p>
+      </section>
+    </main>
+  
+    <footer class="pie">
+      <a class="marca marca--pie" href="#" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+      <div class="pie__legal">
+        <span>Festival de la Leyenda Vallenata</span>
+        <span>Contenido ilustrativo. Sin vinculación oficial.</span>
+      </div>
+    </footer>
+  
+    <script>
+      const botonMostrar = document.querySelector(".mostrar");
+      const campoContrasena = document.querySelector("#contrasena");
+  
+      botonMostrar.addEventListener("click", () => {
+        const mostrar = campoContrasena.type === "password";
+        campoContrasena.type = mostrar ? "text" : "password";
+        botonMostrar.setAttribute("aria-pressed", String(mostrar));
+        botonMostrar.querySelector("span").textContent = mostrar ? "Ocultar" : "Mostrar";
+      });
+    </script>
+  </body>
+<!--<body>
     <h2>Registro de nuevo usuario</h2>
     <form method="post">
         {% csrf_token %}
@@ -14,5 +178,5 @@
         <button type="submit">Registrarse</button>
     </form>
     <p>¿Ya tienes cuenta? <a href="{%url 'login' %}">Iniciar sesión</a></p>
-</body>
+</body>-->
 </html>
