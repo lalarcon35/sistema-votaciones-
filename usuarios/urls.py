@@ -1,14 +1,16 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
-from . import views
+from . import views 
+from .views import LoginInteligente
 
 urlpatterns =  [
     # RF-01 Registro de usuarios
     path('registro/', views.registro, name='registro'),
      # RF-02 inicio y cierre de sesion
-    path('login/', LoginView.as_view(template_name='usuarios/login.html'),name='login'),
+    #path('login/', LoginView.as_view(template_name='usuarios/login.html'),name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
      #Rutas para redirigir a pagina de inicio y cierre de sesion
     path('inicio/', views.inicio, name='inicio'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', LoginInteligente.as_view(), name='login'),
 ]

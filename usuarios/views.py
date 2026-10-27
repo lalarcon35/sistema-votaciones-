@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegistroUsuarioForm
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
 
 def registro(request):
     if request.method == 'POST':
@@ -18,4 +20,14 @@ def registro(request):
 
 @login_required
 def inicio(request):
-    return render(request, 'usuarios/inicio.html')
+    return render(request, 'votaciones/tarjeton.html')
+
+class LoginInteligente(LoginView):
+    template_name = 'usuarios/login.html'
+
+    def get_success_url(self):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return reverse_lazy('admin:index')
+        
+        # EL CAMBIO ESTÁ AQUÍ: Agrega 'votaciones:' antes de 'tarjeton'
+        return reverse_lazy('votaciones:tarjeton')

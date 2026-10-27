@@ -1,12 +1,304 @@
+{% load static %}
 <!DOCTYPE html>
-<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarjeton participante - Festival Vallenato</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Votación | Festival de la Leyenda Vallenata</title>
+  <link rel="stylesheet" href="{% static 'votaciones/Tarjeton.css' %}">
 </head>
-<body style="font-family: Arial sans-serif; max-width: 800px; margin:auto; padding: 20px;">
+<body>
+    <header class="encabezado">
+      <a class="marca" href="{% url 'inicio' %}" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+  
+      <nav class="navegacion" aria-label="Navegación principal">
+        <a class="navegacion__enlace navegacion__enlace--activo" href="#votacion">Votación</a>
+        <a class="navegacion__enlace" href="#pasos">Reglas de participación</a>
+      </nav>
+  
+      <div class="acciones">
+        <span class="usuario">Hola, {{ user.first_name|default:user.username }}</span>
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button class="boton boton--salir" type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+    </header>
+  
+    <main>
+      <section class="hero">
+        <div class="hero__texto">
+          <p class="eyebrow">El folclor nos une</p>
+          <h1>El talento se escucha.<br>Tu voz lo elige.</h1>
+          <p class="hero__descripcion">
+            Participa en esta muestra de votación y celebra el talento vallenato.
+            Elige un solo candidato por categoría y revisa tu elección antes de confirmar.
+          </p>
+          <p class="hero__nota">
+            <span aria-hidden="true"></span>
+            Homenaje a nuestra tradición · Valledupar, Colombia
+          </p>
+        </div>
+        <img
+          class="hero__logo"
+          src="{% static 'votaciones/logo-blue-1.png' %}"
+          alt="Fundación Festival de la Leyenda Vallenata. Patrimonio Cultural de la Nación"
+        >
+      </section>
+      <div class="edicion-wrapper">
+        <ul class="edicion-lista">
+          <li class="edicion-item">
+            <strong>Edición:</strong> 60° Festival de la Leyenda Vallenata (2026)
+          </li>
+        </ul>
+      </div>
+      <section class="votacion" id="votacion" aria-labelledby="titulo-categorias">
+        <div class="seccion__encabezado">
+          <h2 id="titulo-categorias"><span>01 /</span> Elige una categoría</h2>
+          {% if categorias %}
+            <p>Un solo candidato por categoría</p>
+          {% endif %}
+        </div>
+  
+        {% if not categorias %}
+          <div class="estado-vacio estado-vacio--categorias">
+            <span class="estado-vacio__icono" aria-hidden="true">♫</span>
+            <h2>No hay categorías existentes</h2>
+            <p>Cuando se agreguen categorías de votación, aparecerán aquí.</p>
+          </div>
+        {% endif %}
+  
+        {% if categorias %}
+          <form method="post" action="">
+            {% csrf_token %}
+            
+            <div class="categorias" role="tablist" aria-label="Categorías de votación">
+              {% for categoria in categorias %}
+                <button
+                  class="categoria"
+                  id="categoria-tab-{{ categoria.pk }}"
+                  type="button"
+                  role="tab"
+                  aria-controls="categoria-panel-{{ categoria.pk }}"
+                  aria-selected="false"
+                  data-category-tab="{{ categoria.pk }}"
+                >
+                  {{ categoria.nombre }}
+                  <span class="categoria__check" aria-hidden="true">✓</span>
+                </button>
+              {% endfor %}
+            </div>
+  
+            <div class="estado-vacio estado-vacio--seleccion" id="estado-seleccion">
+              <span class="estado-vacio__icono" aria-hidden="true">♫</span>
+              <h2>Selecciona una categoría</h2>
+              <p>Los participantes aparecerán aquí cuando elijas una categoría.</p>
+            </div>
+  
+            {% for categoria in categorias %}
+              <section
+                class="categoria-panel"
+                id="categoria-panel-{{ categoria.pk }}"
+                role="tabpanel"
+                aria-labelledby="categoria-tab-{{ categoria.pk }}"
+                data-category-panel="{{ categoria.pk }}"
+                hidden
+              >
+                <div class="candidatos__encabezado">
+                  <h2>{{ categoria.nombre }}</h2>
+                  <p><span>02 /</span> Elige tu favorito</p>
+                </div>
+  
+                <!-- CÓDIGO CORREGIDO: Consulta directa, sin "with" ni "endwith" -->
+                {% if categoria.participantes.all %}
+                    <div class="candidatos">
+                     {% for participante in categoria.participantes.all %}
+                      <article class="candidato">
+                        {% if participante.foto %}
+                          <img
+                            class="candidato__foto"
+                            src="{{ participante.foto }}"
+                            alt="Fotografía de {{ participante.nombre }}"
+                            loading="lazy"
+                          >
+                        {% else %}
+                          <div class="candidato__foto candidato__foto--vacia" aria-hidden="true">
+                            <span>{{ participante.nombre_completo|first|upper }}</span>
+                          </div>
+                        {% endif %}
+                        <div class="candidato__contenido">
+                          <h3>{{ participante.nombre_completo }}</h3>
+                          {% if participante.municipio %}
+                            <p class="candidato__ubicacion">
+                              <span aria-hidden="true">⌖</span>{{ participante.municipio }}
+                            </p>
+                          {% endif %}
+                          <label class="candidato__selector">
+                            <input
+                              type="radio"
+                              name="participante_{{ categoria.pk }}"
+                              value="{{ participante.pk }}"
+                              data-candidate-name="{{ participante.nombre_completo}}"
+                            >
+                            <span>Elegir candidato</span>
+                          </label>
+                        </div>
+                      </article>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="estado-vacio estado-vacio--participantes">
+                    <span class="estado-vacio__icono" aria-hidden="true">♪</span>
+                    <h3>No hay participantes existentes en esta categoría</h3>
+                    <p>Cuando se agreguen participantes a esta categoría, aparecerán aquí.</p>
+                  </div>
+                {% endif %}
+              </section>
+            {% endfor %}
+  
+            <aside class="confirmacion" aria-live="polite">
+              <div class="confirmacion__mensaje">
+                <span class="confirmacion__icono" aria-hidden="true">✓</span>
+                <div>
+                  <p class="eyebrow">03 / Revisa y confirma</p>
+                  <h2 id="estado-voto">Aún no has elegido un candidato</h2>
+                  <p id="detalle-voto">Selecciona una opción arriba para habilitar la confirmación de tu voto.</p>
+                </div>
+              </div>
+              <div class="confirmacion__accion">
+                <button class="boton-confirmar" id="confirmar-voto" type="submit" disabled>
+                  Confirmar voto <span aria-hidden="true">→</span>
+                </button>
+                <small id="contador-votos">0 de {{ categorias|length }} categorías seleccionadas</small>
+              </div>
+            </aside>
+          </form>
+        {% endif %}
+      </section>
+  
+      <section class="pasos" id="pasos" aria-labelledby="titulo-pasos">
+        <h2 id="titulo-pasos">Tu voto, paso a paso</h2>
+        <div class="pasos__lista">
+          <article class="paso">
+            <span>01</span>
+            <div>
+              <h3>Explora cada categoría</h3>
+              <p>Consulta los perfiles antes de elegir. Las candidaturas de esta página son ejemplos ficticios.</p>
+            </div>
+          </article>
+          <article class="paso">
+            <span>02</span>
+            <div>
+              <h3>Elige solo un candidato</h3>
+              <p>Selecciona tu favorito en la categoría activa. Puedes revisar tu elección antes de confirmar.</p>
+            </div>
+          </article>
+          <article class="paso">
+            <span>03</span>
+            <div>
+              <h3>Revisa antes de confirmar</h3>
+              <p>Verifica el nombre y la categoría. La confirmación es el último paso del voto.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  
+    <footer class="pie">
+      <a class="marca marca--pie" href="{% url 'inicio' %}" aria-label="Festival de la Leyenda Vallenata">
+        <span class="marca__icono" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="marca__texto">
+          <small>FESTIVAL DE LA</small>
+          <strong>Leyenda Vallenata</strong>
+        </span>
+      </a>
+      <div class="pie__legal">
+        <span>Festival de la Leyenda Vallenata</span>
+        <span>Contenido ilustrativo. Sin vinculación oficial.</span>
+      </div>
+    </footer>
+  
+    {% if categorias %}
+      <script>
+        const tabs = Array.from(document.querySelectorAll("[data-category-tab]"));
+        const panels = Array.from(document.querySelectorAll("[data-category-panel]"));
+        const estadoSeleccion = document.querySelector("#estado-seleccion");
+        const estadoVoto = document.querySelector("#estado-voto");
+        const detalleVoto = document.querySelector("#detalle-voto");
+        const confirmarVoto = document.querySelector("#confirmar-voto");
+        const contadorVotos = document.querySelector("#contador-votos");
+        const totalCategorias = tabs.length;
+        const selecciones = new Map();
+  
+        function actualizarResumen() {
+          const categoriaActiva = document.querySelector(".categoria--activa");
+          const seleccion = categoriaActiva
+            ? selecciones.get(categoriaActiva.dataset.categoryTab)
+            : null;
+  
+          confirmarVoto.disabled = !seleccion;
+          contadorVotos.textContent =
+            `${selecciones.size} de ${totalCategorias} categorías seleccionadas`;
+  
+          if (seleccion) {
+            estadoVoto.textContent = `Has elegido a ${seleccion.nombre}`;
+            detalleVoto.textContent = `Tu selección para ${seleccion.categoria} está lista para revisar.`;
+          } else {
+            estadoVoto.textContent = "Aún no has elegido un candidato";
+            detalleVoto.textContent =
+              "Selecciona una opción arriba para habilitar la confirmación de tu voto.";
+          }
+        }
+  
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            estadoSeleccion.hidden = true;
+  
+            tabs.forEach((item) => {
+              const activo = item === tab;
+              item.classList.toggle("categoria--activa", activo);
+              item.setAttribute("aria-selected", String(activo));
+            });
+  
+            panels.forEach((panel) => {
+              const activo = panel.dataset.categoryPanel === tab.dataset.categoryTab;
+              panel.hidden = !activo;
+              panel.classList.toggle("categoria-panel--activo", activo);
+            });
+  
+            actualizarResumen();
+          });
+        });
+  
+        document.querySelectorAll(".candidato__selector input").forEach((radio) => {
+          radio.addEventListener("change", () => {
+            const panel = radio.closest("[data-category-panel]");
+            const tab = document.querySelector(
+              `[data-category-tab="${panel.dataset.categoryPanel}"]`
+            );
+            selecciones.set(panel.dataset.categoryPanel, {
+              categoria: tab.textContent.trim().replace("✓", "").trim(),
+              nombre: radio.dataset.candidateName,
+            });
+            actualizarResumen();
+          });
+        });
+      </script>
+    {% endif %}
+  </body>
+</html>
+<!--<body style="font-family: Arial sans-serif; max-width: 800px; margin:auto; padding: 20px;">
     <h2>Tarjeton de votaciones</h2>
     <p>Bienvenido, <strong>{{user.first_name}}{{user.last_name}}</strong> Selecciona tus participantes favoritos</p>
 
@@ -39,5 +331,4 @@
             Enviar Voto
         </button>
     </form>  
-</body>
-</html>
+</body>-->
