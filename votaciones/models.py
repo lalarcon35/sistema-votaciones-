@@ -11,7 +11,7 @@ class Categoria(models.Model):
 
 class Participante(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='participantes')
-    nombre_completo = models.CharField(max_length=150)
+    nombre_completo = models.CharField(max_length=200)
     detalles = models.CharField(max_length=200, blank=True, null=True, help_text="Ej: Ciudad de origen, o nombre de la canción inédita")
     # foto = models.ImageField(upload_to='participantes/', null=True, blank=True)
 
@@ -26,11 +26,9 @@ class Voto(models.Model):
     fecha_voto = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Regla estricta: Un usuario solo puede tener un registro de voto por categoría
         unique_together = ('usuario', 'categoria')
 
     def __str__(self):
-        # Si tu usuario ya no usa 'documento' sino 'email', cambia 'documento' por 'email' aquí abajo
         return f"Voto de {self.usuario.username} en {self.categoria.nombre}"
         
         

@@ -19,6 +19,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('votaciones/',include('votaciones.urls')), #sistema de votaciones 
+    path('',include('votaciones.urls')), #sistema de votaciones 
     path('usuarios/', include('usuarios.urls')), #Gestion de usuarios y acceso
 ]

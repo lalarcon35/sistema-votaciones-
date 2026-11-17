@@ -5,4 +5,5 @@ app_name='votaciones'
 
 urlpatterns = [
     path('tarjeton/', views.tarjeton_votacion, name='tarjeton'),
+    path('api/categorias/',views.api_categorias_get, name='api_categorias'),
 ]

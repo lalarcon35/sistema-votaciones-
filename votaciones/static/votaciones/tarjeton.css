@@ -78,6 +78,32 @@
     border-radius: 2px;
   }
   
+  .contenedor-alertas {
+    margin-bottom: 20px;
+}
+
+.alerta {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    font-family: sans-serif;
+}
+
+/* Color amarillo para cuando ya votó (warning) */
+.alerta-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeeba;
+}
+
+/* Color verde para cuando el voto es exitoso (success) */
+.alerta-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
   .marca__icono i:nth-child(1),
   .marca__icono i:nth-child(6) {
     height: 14px;

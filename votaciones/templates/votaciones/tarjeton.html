@@ -19,7 +19,7 @@
           <strong>Leyenda Vallenata</strong>
         </span>
       </a>
-  
+      
       <nav class="navegacion" aria-label="Navegación principal">
         <a class="navegacion__enlace navegacion__enlace--activo" href="#votacion">Votación</a>
         <a class="navegacion__enlace" href="#pasos">Reglas de participación</a>
@@ -33,7 +33,7 @@
         </form>
       </div>
     </header>
-  
+    
     <main>
       <section class="hero">
         <div class="hero__texto">
@@ -146,7 +146,7 @@
                             <input
                               type="radio"
                               name="participante_{{ categoria.pk }}"
-                              value="{{ participante.pk }}"
+                              value="{{ participante.id}}"
                               data-candidate-name="{{ participante.nombre_completo}}"
                             >
                             <span>Elegir candidato</span>
@@ -295,6 +295,51 @@
           });
         });
       </script>
+      <script>
+        function cerrarModalAlertas() {
+            const modal = document.getElementById('modal-alertas');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {%if messages %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Voto registrado!',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#28a745'
+                    });
+                    {% elif message.tags == 'warning' %}
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atención',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#f39c12'
+                    });
+                {% elif message.tags == 'error' %}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#dc3545'
+                    });
+                {% else %}
+                    Swal.fire({
+                        title: 'Aviso',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    {% endif %}
+              {% endfor %}
+        });
+    </script>
     {% endif %}
   </body>
 </html>
