@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#181818">
+  <title>Cargar Participante | Panel de Administración</title>
+  <link rel="stylesheet" href="{% static 'votaciones/admin_categorias.css' %}">
+  <link rel="stylesheet" href="{% static 'votaciones/form_participante.css' %}">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" aria-label="Menú de administración">
+      <div class="sidebar__profile">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+        </div>
+        <div>
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>Administrador</span>
+        </div>
+      </div>
+
+      <div class="sidebar__divider"></div>
+      <p class="sidebar__label">Administración</p>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+          <span>Categorías</span>
+        </a>
+        <a class="nav-link nav-link--active" href="{% url 'votaciones:lista_participantes' %}" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a4 4 0 0 0 0-8M21 20v-1.5a4 4 0 0 0-3-3.87"/></svg>
+          <span>Participantes</span>
+        </a>
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}#resumen-votos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Votaciones</span>
+        </a>
+        <form class="logout-form" action="{% url 'votaciones:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="nav-link nav-link--logout" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
+      </nav>
+
+      <div class="sidebar__brand" aria-label="Festival de la Leyenda">
+        <span class="brand-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span>Festival de<br>la Leyenda</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumbs" aria-label="Ruta de navegación">
+          <span>Panel de Administración</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <a href="{% url 'votaciones:lista_participantes' %}">Participantes</a>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <strong>Cargar participante</strong>
+        </div>
+
+        <a class="public-link" href="/admin/">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          <span>Ir a Django Admin</span>
+        </a>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Votaciones Festival de la Leyenda</p>
+            <h1>Cargar participante</h1>
+            <p class="page-description">Registra un concursante en el sistema y asígnalo a su categoría correspondiente.</p>
+          </div>
+          <a class="back-link" href="{% url 'votaciones:lista_participantes' %}">← Volver a participantes</a>
+        </section>
+
+        <div class="form-layout">
+          <section class="card">
+            <h2 class="card__title">Información del participante</h2>
+            <p class="card__subtitle">Completa los datos obligatorios para guardarlo en la base de datos.</p>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              {{ form.non_field_errors }}
+
+              <div class="field-group">
+                <label class="field-label" for="{{ form.nombre_completo.id_for_label }}">{{ form.nombre_completo.label }}</label>
+                {{ form.nombre_completo }}
+                <span class="field-hint">Nombre artístico o completo tal como aparecerá en el tarjetón.</span>
+                {{ form.nombre_completo.errors }}
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+                {{ form.categoria }}
+                <span class="field-hint">Selecciona la categoría en la que compite.</span>
+                {{ form.categoria.errors }}
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="{{ form.detalles.id_for_label }}">{{ form.detalles.label }}</label>
+                {{ form.detalles }}
+                <span class="field-hint">Ej: Ciudad de origen, o nombre de la canción inédita.</span>
+                {{ form.detalles.errors }}
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="{{ form.foto.id_for_label }}">{{ form.foto.label }}</label>
+                <div class="file-box">
+                  {{ form.foto }}
+                  <span class="field-hint">Formatos recomendados: JPG, PNG o WebP.</span>
+                </div>
+                {{ form.foto.errors }}
+              </div>
+
+              <div class="form-actions">
+                <button class="button button--primary" type="submit">+ Guardar participante</button>
+                <a class="button button--secondary" href="{% url 'votaciones:lista_participantes' %}">Cancelar</a>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <footer class="content-footer">Panel de Administración · v1.0</footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const inputNombre = document.getElementById('{{ form.nombre_completo.id_for_label }}');
+    const selectCat = document.getElementById('{{ form.categoria.id_for_label }}');
+    const inputDetalles = document.getElementById('{{ form.detalles.id_for_label }}');
+    const inputFoto = document.getElementById('{{ form.foto.id_for_label }}');
+
+    const previewNombre = document.getElementById('preview-nombre');
+    const previewCategoria = document.getElementById('preview-categoria');
+    const previewDetalles = document.getElementById('preview-detalles');
+    const previewInitial = document.getElementById('preview-initial');
+    const previewImg = document.getElementById('preview-img');
+
+    if (inputNombre) {
+      inputNombre.addEventListener('input', () => {
+        const val = inputNombre.value.trim();
+        previewNombre.textContent = val || 'Nombre del participante';
+        previewInitial.textContent = val ? val[0].toUpperCase() : 'P';
+      });
+    }
+
+    if (selectCat) {
+      const actualizarCat = () => {
+        const opt = selectCat.options[selectCat.selectedIndex];
+        previewCategoria.textContent = (opt && opt.value) ? opt.text : 'Categoría seleccionada';
+      };
+      selectCat.addEventListener('change', actualizarCat);
+      actualizarCat();
+    }
+
+    if (inputDetalles) {
+      inputDetalles.addEventListener('input', () => {
+        previewDetalles.textContent = inputDetalles.value.trim() || 'Detalles del concursante';
+      });
+    }
+
+    if (inputFoto) {
+      inputFoto.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          previewImg.src = URL.createObjectURL(file);
+          previewImg.style.display = 'block';
+          previewInitial.style.display = 'none';
+        } else {
+          previewImg.style.display = 'none';
+          previewInitial.style.display = 'block';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

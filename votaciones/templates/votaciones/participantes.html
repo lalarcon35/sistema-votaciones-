@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#181818">
+        <title>Cargar Participante | Panel de Administración</title>
+        <link rel="stylesheet" href="{% static 'votaciones/admin_categorias.css' %}">
+        <link rel="stylesheet" href="{% static 'votaciones/form_participante.css' %}"> 
+     </head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+        </div>
+        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+        <span>Administrador</span>
+      </div>
+
+      <div class="sidebar__divider"></div>
+      <p class="sidebar__label">Administración</p>
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+          <span>Categorías</span>
+        </a>
+        <a class="nav-link nav-link--active" href="{% url 'votaciones:lista_participantes' %}" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a4 4 0 0 0 0-8M21 20v-1.5a4 4 0 0 0-3-3.87"/></svg>
+          <span>Participantes</span>
+        </a>
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}#resumen-votos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Votaciones</span>
+        </a>
+        <form class="logout-form" action="{% url 'votaciones:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="nav-link nav-link--logout" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
+      </nav>
+
+      <div class="sidebar__brand">
+        <span class="brand-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span>Festival de<br>la Leyenda</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <span>Panel de Administración</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <strong>Participantes</strong>
+        </div>
+        <div class="topbar__actions">
+          <a class="public-link" href="/admin/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            <span>Ir a Django Admin</span>
+          </a>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Votaciones Festival de la Leyenda</p>
+            <h1>
+              {% if categoria_seleccionada %}
+                Participantes · {{ categoria_seleccionada.nombre }}
+              {% else %}
+                Participantes
+              {% endif %}
+            </h1>
+            <p class="page-description">Lista de participantes registrados y carga de nuevos concursantes.</p>
+          </div>
+          <a class="button button--primary" href="{% url 'votaciones:crear_participante' %}{% if categoria_seleccionada %}?categoria={{ categoria_seleccionada.pk }}{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Cargar participante
+          </a>
+        </section>
+
+        <section class="summary-grid">
+          <a class="summary-card" href="{% url 'votaciones:panel_categorias' %}">
+            <div class="summary-card__top">
+              <span>Categorías</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 12 9-5 9 5-9 5-9-5Z"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ total_categorias }}</strong>
+            <span class="summary-card__caption">Registradas en sistema</span>
+          </a>
+
+          <article class="summary-card summary-card--dark">
+            <div class="summary-card__top">
+              <span>Participantes</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a4 4 0 0 0 0-8M21 20v-1.5a4 4 0 0 0-3-3.87"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ total_participantes }}</strong>
+            <span class="summary-card__caption">En competencia</span>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-card__top">
+              <span>Votos</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ total_votos }}</strong>
+            <span class="summary-card__caption">Votos válidos</span>
+          </article>
+        </section>
+
+        <section class="categories-section">
+          <div class="section-heading">
+            <h2>Listado de participantes</h2>
+            <span class="count-badge">{{ participantes|length }} mostrados</span>
+          </div>
+
+          <div class="category-grid">
+            {% for p in participantes %}
+              <article class="category-card">
+                <div class="category-card__body">
+                  <div class="category-card__heading">
+                    <div class="category-title">
+                      <span class="category-accent category-accent--orange"></span>
+                      <div>
+                        <h3>{{ p.nombre_completo }}</h3>
+                        <p>{{ p.categoria.nombre }}</p>
+                      </div>
+                    </div>
+                    <span class="status-badge"><i></i>{{ p.total_votos }} votos</span>
+                  </div>
+                  {% if p.foto %}
+                    <div style="margin-top: 12px;">
+                      <img src="{{ p.foto.url }}" alt="{{ p.nombre_completo }}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 7px;">
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="category-card__footer">
+                  <span>{{ p.detalles|default:""|truncatechars:65 }}</span>
+                </div>
+              </article>
+            {% empty %}
+              <p>No hay participantes registrados todavía.</p>
+            {% endfor %}
+          </div>
+        </section>
+        <a class="button button--outline" href="{% url 'votaciones:ver_informe_participantes' %}{% if categoria_seleccionada %}?categoria={{ categoria_seleccionada.pk }}{% endif %}">
+          Ver informe
+        </a>
+        <footer class="content-footer">Panel de Administración · v1.0</footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

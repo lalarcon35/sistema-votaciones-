@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#181818">
+  <title>Informe de Participantes | Panel de Administración</title>
+  <link rel="stylesheet" href="{% static 'votaciones/informe_participantes.css' %}">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" aria-label="Menú de administración">
+      <div class="sidebar__profile">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+        </div>
+        <div>
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>Administrador</span>
+        </div>
+      </div>
+
+      <div class="sidebar__divider"></div>
+      <p class="sidebar__label">Administración</p>
+
+      <nav class="sidebar__nav">
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+          <span>Categorías</span>
+        </a>
+        <a class="nav-link nav-link--active" href="{% url 'votaciones:lista_participantes' %}" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a4 4 0 0 0 0-8M21 20v-1.5a4 4 0 0 0-3-3.87"/></svg>
+          <span>Participantes</span>
+        </a>
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}#resumen-votos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Votaciones</span>
+        </a>
+        <form class="logout-form" action="{% url 'votaciones:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="nav-link nav-link--logout" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
+      </nav>
+
+      <div class="sidebar__brand" aria-label="Festival de la Leyenda">
+        <span class="brand-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span>Festival de<br>la Leyenda</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumbs" aria-label="Ruta de navegación">
+          <span>Panel de Administración</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <a href="{% url 'votaciones:lista_participantes' %}">Participantes</a>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <strong>Informe</strong>
+        </div>
+
+        <div class="topbar__actions">
+          <a class="public-link" href="/admin/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            <span>Ir a Django Admin</span>
+          </a>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Votaciones Festival de la Leyenda</p>
+            <h1>
+              {% if categoria_seleccionada %}
+                Informe · {{ categoria_seleccionada.nombre }}
+              {% else %}
+                Informe de participantes
+              {% endif %}
+            </h1>
+            <p class="page-description">Consulta los resultados en pantalla, descarga el archivo CSV o imprímelo en PDF.</p>
+          </div>
+
+          <div class="heading-actions">
+            <a class="button button--outline" href="{% url 'votaciones:lista_participantes' %}{% if categoria_seleccionada %}?categoria={{ categoria_seleccionada.pk }}{% endif %}">
+              ← Volver
+            </a>
+            <button class="button button--outline" type="button" onclick="window.print()">
+              Imprimir / PDF
+            </button> 
+          </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Resumen del informe">
+          <article class="summary-card summary-card--dark">
+            <div class="summary-card__top">
+              <span>Participantes</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a4 4 0 0 0 0-8M21 20v-1.5a4 4 0 0 0-3-3.87"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ participantes|length }}</strong>
+            <span class="summary-card__caption">En este informe</span>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-card__top">
+              <span>Votos contabilizados</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ votos_mostrados }}</strong>
+            <span class="summary-card__caption">Total acumulado</span>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-card__top">
+              <span>Categorías</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 12 9-5 9 5-9 5-9-5Z"/></svg>
+            </div>
+            <strong class="summary-card__value">{{ total_categorias }}</strong>
+            <span class="summary-card__caption">Registradas en sistema</span>
+          </article>
+        </section>
+
+        <section>
+          <div class="section-heading">
+            <h2>Detalle de resultados</h2>
+            <span class="count-badge">{{ participantes|length }} registros</span>
+          </div>
+
+          <div class="report-card">
+            <div class="report-table-wrap">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Participante</th>
+                    <th>Categoría</th>
+                    <th>Votos</th>
+                    <th>Participación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for p in participantes %}
+                    <tr>
+                      <td>
+                        <span class="rank-badge {% if forloop.first and p.total_votos > 0 %}rank-badge--top{% endif %}">
+                          {{ forloop.counter }}
+                        </span>
+                      </td>
+                      <td><strong>{{ p.nombre_completo }}</strong></td>
+                      <td>{{ p.categoria.nombre }}</td>
+                      <td><strong>{{ p.total_votos }}</strong></td>
+                      <td>
+                        <div class="progress-wrap">
+                          <div class="progress-bar">
+                            <span style="width: {{ p.porcentaje|stringformat:'f' }}%;"></span>
+                          </div>
+                          <span class="progress-value">{{ p.porcentaje }}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5">No hay participantes registrados para este informe.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <footer class="content-footer">Panel de Administración · v1.0</footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

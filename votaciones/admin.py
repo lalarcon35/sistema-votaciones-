@@ -14,7 +14,7 @@ class ParticipanteAdmin(admin.ModelAdmin):
     @admin.display(description='Foto')
     def mostrar_foto(self, obj):
         if obj.foto:
-            return format_html('<img src="{}", obj.foto.url>')
+            return format_html('<img src="{}"/>', obj.foto.url)
         return 'Sin foto'
     
 @admin.register(Voto)

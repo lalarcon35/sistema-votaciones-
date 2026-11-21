@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#161616">
+  <title>Crear Categoría | Panel de Administración</title>
+  <link rel="stylesheet" href="{% static 'votaciones/crear_categoria.css' %}">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" aria-label="Menú de administración">
+      <div class="sidebar__profile">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+        </div>
+        <div>
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>Administrador</span>
+        </div>
+      </div>
+
+      <div class="sidebar__divider"></div>
+      <p class="sidebar__label">Administración</p>
+
+      <nav class="sidebar__nav">
+        <a class="nav-link nav-link--active" href="{% url 'votaciones:panel_categorias' %}" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+          <span>Categorías</span>
+        </a>
+        <a class="nav-link" href="{% url 'votaciones:panel_categorias' %}#resumen-votos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Votaciones</span>
+        </a>
+        <a class="nav-link" href="/admin/">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+          <span>Django Admin</span>
+        </a>
+        <form class="logout-form" action="{% url 'votaciones:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="nav-link nav-link--logout" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
+      </nav>
+
+      <div class="sidebar__brand" aria-label="Festival de la Leyenda">
+        <span class="brand-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span>Festival de<br>la Leyenda</span>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumbs" aria-label="Ruta de navegación">
+          <span>Panel de Administración</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <a href="{% url 'votaciones:panel_categorias' %}">Categorías</a>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          <strong>Nueva categoría</strong>
+        </div>
+
+        <a class="public-link" href="{% url 'votaciones:tarjeton' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+          <span>Ver página pública</span>
+        </a>
+      </header>
+
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Votaciones Festival de la Leyenda</p>
+            <h1>Crear nueva categoría</h1>
+            <p class="page-description">Registra una nueva categoría en el sistema para asociar participantes y habilitar votos.</p>
+          </div>
+          <a class="back-link" href="{% url 'votaciones:panel_categorias' %}">← Volver a categorías</a>
+        </section>
+
+        <div class="form-layout">
+          <section class="card">
+            <h2 class="card__title">Información de la categoría</h2>
+            <p class="card__subtitle">Completa los datos obligatorios para guardarla en la base de datos.</p>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {{ form.non_field_errors }}
+
+              <div class="field-group">
+                <label class="field-label" for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                {{ form.nombre }}
+                <span class="field-hint">Este nombre aparecerá en el panel y en el tarjetón de votación.</span>
+                {{ form.nombre.errors }}
+              </div>
+              {% if form.descripcion %}
+                <div class="field-group">
+                    <label class="field-label" for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                    {{ form.descripcion }}
+                    <span class="field-hint">Breve descripción de la categoría.</span>
+                    {{ form.descripcion.errors }}
+                </div>
+              {% endif %}
+              <div class="status-box">
+                <div>
+                  <strong>Estado de la categoría</strong>
+                  <span>Define si los usuarios pueden votar en esta categoría inmediatamente.</span>
+                </div>
+                <label class="switch" aria-label="{{ form.activa.label }}">
+                  {{ form.activa }}
+                  <span class="slider"></span>
+                </label>
+              </div>
+              {{ form.activa.errors }}
+
+              <div class="form-actions">
+                <button class="button button--primary" type="submit">+ Guardar categoría</button>
+                <a class="button button--secondary" href="{% url 'votaciones:panel_categorias' %}">Cancelar</a>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <footer class="content-footer">Panel de Administración · v1.0</footer>
+      </main>
+    </div>
+  </div>
+  <div class="field-group">
+    <label class="field-label" for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+    {{ form.descripcion }}
+    <span class="field-hint">Breve descripción de la categoría.</span>
+    {{ form.descripcion.errors }}
+  </div>
+
+  <script>
+    const inputNombre = document.getElementById('{{ form.nombre.id_for_label }}');
+    const inputActiva = document.getElementById('{{ form.activa.id_for_label }}');
+    const previewNombre = document.getElementById('preview-nombre');
+    const previewBadge = document.getElementById('preview-badge');
+    const previewEstado = document.getElementById('preview-estado');
+    const inputDesc = document.getElementById('{{ form.descripcion.id_for_label }}');
+    const previewDesc = document.getElementById('preview-desc'); 
+
+    if (inputNombre) {
+      inputNombre.addEventListener('input', () => {
+        previewNombre.textContent = inputNombre.value.trim() || 'Nombre de la categoría';
+      });
+    }
+
+    if (inputActiva) {
+      const actualizarEstado = () => {
+        if (inputActiva.checked) {
+          previewBadge.classList.remove('is-inactive');
+          previewEstado.textContent = 'Activa';
+        } else {
+          previewBadge.classList.add('is-inactive');
+          previewEstado.textContent = 'Inactiva';
+        }
+      };
+      inputActiva.addEventListener('change', actualizarEstado);
+      actualizarEstado();
+    }
+
+    if (inputDesc && previewDesc) {
+        inputDesc.addEventListener('input', () => {
+        previewDesc.textContent = inputDesc.value.trim() || 'Breve descripción de la categoría';
+         });
+    }
+  </script>
+</body>
+</html>
