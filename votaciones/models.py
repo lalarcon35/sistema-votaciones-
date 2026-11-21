@@ -13,7 +13,7 @@ class Participante(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='participantes')
     nombre_completo = models.CharField(max_length=200)
     detalles = models.CharField(max_length=200, blank=True, null=True, help_text="Ej: Ciudad de origen, o nombre de la canción inédita")
-    # foto = models.ImageField(upload_to='participantes/', null=True, blank=True)
+   # foto = models.ImageField(upload_to='participantes/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.nombre_completo} - {self.categoria.nombre}"

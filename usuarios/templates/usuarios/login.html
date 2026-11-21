@@ -54,7 +54,13 @@
               Usuario o contraseña incorrectos. Por favor intenta de nuevo.
             </div>
           {% endif %}
-  
+          {% if messages %}
+            <div class="alert alert-success">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+          {% endif %}
           <div class="campo">
             <label for="correo">Usuario / Correo electrónico</label>
             <!-- NOTA: Django exige que el name sea "username" para el inicio de sesión por defecto -->

@@ -113,12 +113,12 @@
                 data-category-panel="{{ categoria.pk }}"
                 hidden
               >
+
                 <div class="candidatos__encabezado">
                   <h2>{{ categoria.nombre }}</h2>
                   <p><span>02 /</span> Elige tu favorito</p>
                 </div>
   
-                <!-- CÓDIGO CORREGIDO: Consulta directa, sin "with" ni "endwith" -->
                 {% if categoria.participantes.all %}
                     <div class="candidatos">
                      {% for participante in categoria.participantes.all %}
@@ -126,8 +126,8 @@
                         {% if participante.foto %}
                           <img
                             class="candidato__foto"
-                            src="{{ participante.foto }}"
-                            alt="Fotografía de {{ participante.nombre }}"
+                            src="{{ participante.foto.url}}"
+                            alt="Fotografía de {{ participante.nombre_completo }}"
                             loading="lazy"
                           >
                         {% else %}

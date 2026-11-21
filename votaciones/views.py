@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Categoria, Participante, Voto
 from django.http import JsonResponse
 from django.contrib import messages
+
 @login_required
 def tarjeton_votacion(request):
     categorias = Categoria.objects.all()
