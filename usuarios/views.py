@@ -22,12 +22,12 @@ def registro(request):
 def inicio(request):
     return render(request, 'votaciones/tarjeton.html')
 
+
 class LoginInteligente(LoginView):
     template_name = 'usuarios/login.html'
 
     def get_success_url(self):
         if self.request.user.is_staff or self.request.user.is_superuser:
-            return reverse_lazy('admin:index')
-        
-        # EL CAMBIO ESTÁ AQUÍ: Agrega 'votaciones:' antes de 'tarjeton'
+            return reverse_lazy('votaciones:panel_categorias')
+
         return reverse_lazy('votaciones:tarjeton')

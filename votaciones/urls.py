@@ -14,4 +14,5 @@ urlpatterns = [
     path('panel/participantes/nuevo/', views.crear_participante, name='crear_participante'),
     path('panel/participantes/informe/', views.descargar_informe_participantes, name='descargar_informe_participantes'),
     path('panel/participantes/informe/ver/', views.ver_informe_participantes, name='ver_informe_participantes'),
+    path('panel/categorias/', views.panel_categorias, name='panel_categorias')
 ]
