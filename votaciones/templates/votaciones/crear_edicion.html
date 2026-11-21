@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva Edición | Panel de Administración</title>
+  <link rel="stylesheet" href="{% static 'votaciones/admin_categorias.css' %}">
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="workspace" style="margin-left: 0; width: 100%;">
+      <main class="content">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">Votaciones Festival de la Leyenda</p>
+            <h1>Crear nueva edición</h1>
+            <p class="page-description">Configura una nueva edición del Festival sin modificar el código.</p>
+          </div>
+          <a class="back-link" href="{% url 'votaciones:panel_categorias' %}">← Volver al panel</a>
+        </section>
+
+        {% if error %}
+          <p style="color: #c41616; font-weight: 600; margin-bottom: 12px;">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" style="background: #fff; border: 1px solid #e2e2dd; border-radius: 10px; padding: 20px; max-width: 520px;">
+          {% csrf_token %}
+          <div style="margin-bottom: 14px;">
+            <label for="id_nombre" style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Nombre de la edición</label>
+            <input id="id_nombre" type="text" name="nombre" required placeholder="Ej: 61° Festival de la Leyenda (2027)" style="width:100%; padding:9px 11px; border:1px solid #d4d4ce; border-radius:7px;">
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label for="id_anio" style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Año</label>
+            <input id="id_anio" type="number" name="anio" required min="2020" max="2100" value="2027" style="width:100%; padding:9px 11px; border:1px solid #d4d4ce; border-radius:7px;">
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:600;">
+              <input type="checkbox" name="activa" checked>
+              Edición activa
+            </label>
+          </div>
+
+          <button class="button button--primary" type="submit">Guardar edición</button>
+        </form>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

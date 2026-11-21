@@ -22,7 +22,6 @@ def registro(request):
 def inicio(request):
     return render(request, 'votaciones/tarjeton.html')
 
-
 class LoginInteligente(LoginView):
     template_name = 'usuarios/login.html'
 

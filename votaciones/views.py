@@ -1,109 +1,216 @@
-from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count
-from  django.http import HttpResponse
-from django.shortcuts import render, redirect,get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Categoria, Participante, Voto
-from django.http import JsonResponse
+import csv
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+
 from .forms import CategoriaForm, ParticipanteForm
-from django.shortcuts import get_object_or_404, render
+from .models import Categoria, Edicion, Participante, Voto
+
+
+def obtener_edicion_actual(request):
+    ediciones = Edicion.objects.order_by('-anio', '-id')
+    edicion_id = request.GET.get('edicion')
+
+    if edicion_id:
+        edicion = get_object_or_404(Edicion, pk=edicion_id)
+        request.session['edicion_id'] = edicion.pk
+        return edicion, ediciones
+
+    sesion_id = request.session.get('edicion_id')
+    if sesion_id:
+        edicion = ediciones.filter(pk=sesion_id).first()
+        if edicion:
+            return edicion, ediciones
+
+    edicion = ediciones.filter(activa=True).first() or ediciones.first()
+    if edicion:
+        request.session['edicion_id'] = edicion.pk
+    return edicion, ediciones
+
+
+@staff_member_required(login_url='/admin/login/')
+def crear_edicion(request):
+    error = None
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        anio = request.POST.get('anio', '').strip()
+        activa = request.POST.get('activa') == 'on'
+
+        if not nombre or not anio.isdigit():
+            error = 'Debes ingresar un nombre de edición y un año válido.'
+        else:
+            if activa:
+                Edicion.objects.filter(activa=True).update(activa=False)
+            edicion = Edicion.objects.create(
+                nombre=nombre,
+                anio=int(anio),
+                activa=activa,
+            )
+            request.session['edicion_id'] = edicion.pk
+            return redirect('votaciones:panel_categorias')
+
+    return render(request, 'votaciones/crear_edicion.html', {'error': error})
+
 
 @login_required
+@login_required
 def tarjeton_votacion(request):
-    categorias = Categoria.objects.all()
+    edicion_actual, ediciones = obtener_edicion_actual(request)
+    categorias = (
+        Categoria.objects.filter(edicion=edicion_actual, activa=True)
+        if edicion_actual
+        else Categoria.objects.filter(activa=True)
+    )
+
     if request.method == 'POST':
+        if edicion_actual and not edicion_actual.activa:
+            messages.error(request, "Esta edición del festival no está activa para votación.")
+            return redirect('votaciones:tarjeton')
+
         for categoria in categorias:
             participante_id = request.POST.get(f'participante_{categoria.id}')
-            
+
             if participante_id:
                 ya_voto = Voto.objects.filter(usuario=request.user, categoria=categoria).exists()
-                
+
                 if ya_voto:
                     messages.warning(request, f"Ya tienes un registro en la categoría {categoria.nombre}.")
                 else:
                     try:
-                        participante = Participante.objects.get(id=participante_id)
+                        participante = Participante.objects.get(id=participante_id, categoria=categoria)
                         Voto.objects.create(
                             usuario=request.user,
                             categoria=categoria,
-                            participante=participante
+                            participante=participante,
                         )
                         messages.success(request, f"¡Tu voto para {categoria.nombre} se guardó correctamente!")
                     except Participante.DoesNotExist:
-                        messages.error(request, f"Ocurrió un error al procesar tu voto.")
-        
+                        messages.error(request, "Ocurrió un error al procesar tu voto.")
+
         return redirect('votaciones:tarjeton')
 
-    # Si es una petición GET normal (cuando apenas entras o te logueas), solo muestra la página limpia
-    return render(request, 'votaciones/tarjeton.html', {'categorias': categorias})
+    return render(request, 'votaciones/tarjeton.html', {
+        'categorias': categorias,
+        'edicion_actual': edicion_actual,
+        'ediciones': ediciones,
+    })
+
 
 @staff_member_required(login_url='/admin/login/')
 def panel_categorias(request):
-    categorias = Categoria.objects.annotate(
+    edicion_actual, ediciones = obtener_edicion_actual(request)
+    categorias_qs = (
+        Categoria.objects.filter(edicion=edicion_actual)
+        if edicion_actual
+        else Categoria.objects.all()
+    )
+
+    categorias = categorias_qs.annotate(
         total_participantes=Count('participantes', distinct=True),
         total_votos=Count('voto', distinct=True),
     )
 
+    participantes_qs = (
+        Participante.objects.filter(categoria__edicion=edicion_actual)
+        if edicion_actual
+        else Participante.objects.all()
+    )
+    votos_qs = (
+        Voto.objects.filter(categoria__edicion=edicion_actual)
+        if edicion_actual
+        else Voto.objects.all()
+    )
+
     context = {
         'categorias': categorias,
-        'total_categorias': Categoria.objects.count(),
-        'total_participantes': Participante.objects.count(),
-        'total_votos': Voto.objects.count(),
+        'edicion_actual': edicion_actual,
+        'ediciones': ediciones,
+        'total_categorias': categorias_qs.count(),
+        'total_participantes': participantes_qs.count(),
+        'total_votos': votos_qs.count(),
     }
     return render(request, 'votaciones/admin_categorias.html', context)
 
-def  api_categorias_get(request):
+
+def api_categorias_get(request):
     if request.method == 'GET':
+        edicion_actual, _ = obtener_edicion_actual(request)
         categorias = Categoria.objects.filter(activa=True)
+        if edicion_actual:
+            categorias = categorias.filter(edicion=edicion_actual)
+
         data = []
-        
         for categoria in categorias:
-            opciones = list(categoria.participantes.values('id','nombre_completo','detalles'))
-            
+            opciones = list(categoria.participantes.values('id', 'nombre_completo', 'detalles'))
             data.append({
                 'id': categoria.id,
                 'nombre': categoria.nombre,
-                'descripcion':opciones
-            })  
-        return JsonResponse({'categorias':data}, safe=False)
-      
+                'descripcion': opciones,
+            })
+        return JsonResponse({'categorias': data}, safe=False)
+
+
 @staff_member_required(login_url='/admin/login/')
 def crear_categoria(request):
+    edicion_actual, _ = obtener_edicion_actual(request)
+
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
-            form.save()
+            categoria = form.save(commit=False)
+            if edicion_actual and not getattr(categoria, 'edicion_id', None):
+                categoria.edicion = edicion_actual
+            categoria.save()
             return redirect('votaciones:panel_categorias')
     else:
         form = CategoriaForm()
 
-    return render(request, 'votaciones/crear_categoria.html', {'form': form})
+    return render(request, 'votaciones/crear_categoria.html', {
+        'form': form,
+        'edicion_actual': edicion_actual,
+    })
+
 
 @staff_member_required(login_url='/admin/login/')
 def lista_participantes(request):
+    edicion_actual, ediciones = obtener_edicion_actual(request)
     categoria_id = request.GET.get('categoria')
+
+    categorias_qs = (
+        Categoria.objects.filter(edicion=edicion_actual)
+        if edicion_actual
+        else Categoria.objects.all()
+    )
     participantes = Participante.objects.select_related('categoria').annotate(
         total_votos=Count('voto', distinct=True)
     )
+    if edicion_actual:
+        participantes = participantes.filter(categoria__edicion=edicion_actual)
 
     categoria_seleccionada = None
     if categoria_id:
-        categoria_seleccionada = get_object_or_404(Categoria, pk=categoria_id)
+        categoria_seleccionada = get_object_or_404(categorias_qs, pk=categoria_id)
         participantes = participantes.filter(categoria=categoria_seleccionada)
 
     context = {
         'participantes': participantes,
-        'categorias': Categoria.objects.all(),
+        'categorias': categorias_qs,
         'categoria_seleccionada': categoria_seleccionada,
-        'total_categorias': Categoria.objects.count(),
-        'total_participantes': Participante.objects.count(),
-        'total_votos': Voto.objects.count(),
+        'edicion_actual': edicion_actual,
+        'ediciones': ediciones,
+        'total_categorias': categorias_qs.count(),
+        'total_participantes': participantes.count(),
+        'total_votos': Voto.objects.filter(categoria__edicion=edicion_actual).count() if edicion_actual else Voto.objects.count(),
     }
     return render(request, 'votaciones/participantes.html', context)
 
+
 @staff_member_required(login_url='/admin/login/')
 def crear_participante(request):
+    edicion_actual, _ = obtener_edicion_actual(request)
     initial = {}
     if request.GET.get('categoria'):
         initial['categoria'] = request.GET.get('categoria')
@@ -116,14 +223,26 @@ def crear_participante(request):
     else:
         form = ParticipanteForm(initial=initial)
 
-    return render(request, 'votaciones/form_participante.html', {'form': form})
+    if edicion_actual and 'categoria' in form.fields:
+        form.fields['categoria'].queryset = Categoria.objects.filter(edicion=edicion_actual)
+
+    return render(request, 'votaciones/form_participante.html', {
+        'form': form,
+        'edicion_actual': edicion_actual,
+    })
+
 
 @staff_member_required(login_url='/admin/login/')
 def descargar_informe_participantes(request):
+    edicion_actual, _ = obtener_edicion_actual(request)
     categoria_id = request.GET.get('categoria')
+
     participantes = Participante.objects.select_related('categoria').annotate(
         total_votos=Count('voto', distinct=True)
     ).order_by('-total_votos', 'nombre_completo')
+
+    if edicion_actual:
+        participantes = participantes.filter(categoria__edicion=edicion_actual)
 
     nombre_archivo = 'informe_participantes.csv'
     if categoria_id:
@@ -135,7 +254,7 @@ def descargar_informe_participantes(request):
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-    response.write('\ufeff')  # BOM para que Excel abra tildes y eñes correctamente
+    response.write('\ufeff')
 
     writer = csv.writer(response, delimiter=';')
     writer.writerow(['Puesto', 'Participante', 'Categoría', 'Votos', 'Porcentaje (%)', 'Detalles'])
@@ -153,12 +272,18 @@ def descargar_informe_participantes(request):
 
     return response
 
+
 @staff_member_required(login_url='/admin/login/')
 def ver_informe_participantes(request):
+    edicion_actual, ediciones = obtener_edicion_actual(request)
     categoria_id = request.GET.get('categoria')
+
     participantes = Participante.objects.select_related('categoria').annotate(
         total_votos=Count('voto', distinct=True)
     ).order_by('-total_votos', 'nombre_completo')
+
+    if edicion_actual:
+        participantes = participantes.filter(categoria__edicion=edicion_actual)
 
     categoria_seleccionada = None
     if categoria_id:
@@ -169,9 +294,17 @@ def ver_informe_participantes(request):
     for p in participantes:
         p.porcentaje = round((p.total_votos / votos_mostrados) * 100, 1) if votos_mostrados > 0 else 0
 
+    total_categorias = (
+        Categoria.objects.filter(edicion=edicion_actual).count()
+        if edicion_actual
+        else Categoria.objects.count()
+    )
+
     return render(request, 'votaciones/informe_participantes.html', {
         'participantes': participantes,
         'categoria_seleccionada': categoria_seleccionada,
+        'edicion_actual': edicion_actual,
+        'ediciones': ediciones,
         'votos_mostrados': votos_mostrados,
-        'total_categorias': Categoria.objects.count(),
+        'total_categorias': total_categorias,
     })

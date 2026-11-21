@@ -60,10 +60,6 @@
           <button class="icon-button notification-button" type="button" aria-label="Notificaciones">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
           </button>
-          <a class="public-link" href="/admin/">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
-            <span>Ir a Django Admin</span>
-          </a>
         </div>
       </header>
 
@@ -74,11 +70,30 @@
             <h1 id="page-title">Categorías</h1>
             <p class="page-description">Administra las categorías y sus participantes en un solo lugar.</p>
           </div>
-          <a class="button button--primary" href="{% url 'votaciones:crear_categoria' %}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            Crear nueva categoría
-          </a>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <a class="button button--primary" href="{% url 'votaciones:crear_edicion' %}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Nueva edición
+            </a>
+            <a class="button button--primary" href="{% url 'votaciones:crear_categoria' %}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Crear nueva categoría
+            </a>
+          </div>
         </section>
+
+        {% if ediciones %}
+          <form method="get" style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+            <label for="select-edicion" style="font-size:12px; font-weight:600;">Edición:</label>
+            <select id="select-edicion" name="edicion" onchange="this.form.submit()" style="padding:7px 10px; border-radius:7px; border:1px solid #dcdcd7; background:#fff;">
+              {% for ed in ediciones %}
+                <option value="{{ ed.pk }}" {% if edicion_actual and ed.pk == edicion_actual.pk %}selected{% endif %}>
+                  {{ ed.nombre }}
+                </option>
+              {% endfor %}
+            </select>
+          </form>
+        {% endif %}
 
         <section class="summary-grid" aria-label="Resumen del evento">
           <article class="summary-card summary-card--dark">

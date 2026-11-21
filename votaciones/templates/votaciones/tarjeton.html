@@ -47,6 +47,19 @@
             <span aria-hidden="true"></span>
             Homenaje a nuestra tradición · Valledupar, Colombia
           </p>
+
+          {% if ediciones %}
+            <form method="get" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;">
+              <label for="tarjeton-edicion" style="font-weight: 700;">Edición del festival:</label>
+              <select id="tarjeton-edicion" name="edicion" onchange="this.form.submit()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #d4b96a; background: #fff; font-weight: 600;">
+                {% for ed in ediciones %}
+                  <option value="{{ ed.pk }}" {% if edicion_actual and ed.pk == edicion_actual.pk %}selected{% endif %}>
+                    {{ ed.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+          {% endif %}
         </div>
         <img
           class="hero__logo"
@@ -54,13 +67,7 @@
           alt="Fundación Festival de la Leyenda Vallenata. Patrimonio Cultural de la Nación"
         >
       </section>
-      <div class="edicion-wrapper">
-        <ul class="edicion-lista">
-          <li class="edicion-item">
-            <strong>Edición:</strong> 60° Festival de la Leyenda Vallenata (2026)
-          </li>
-        </ul>
-      </div>
+
       <section class="votacion" id="votacion" aria-labelledby="titulo-categorias">
         <div class="seccion__encabezado">
           <h2 id="titulo-categorias"><span>01 /</span> Elige una categoría</h2>

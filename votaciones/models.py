@@ -1,11 +1,29 @@
 from django.db import models
 from django.conf import settings
 
+class Edicion(models.Model):
+    nombre = models.CharField(max_length=150)  # Ej: "60° Festival de la Leyenda (2026)"
+    anio = models.PositiveIntegerField()
+    activa = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-anio', '-id']
+
+    def __str__(self):
+        return self.nombre
+    
 class Categoria(models.Model):
+    edicion = models.ForeignKey(
+        Edicion,
+        on_delete=models.CASCADE,
+        related_name='categorias',
+        null=True,
+        blank=True,
+    )
     nombre = models.CharField(max_length=150, help_text="Ej: Acordeonero Profesional, Canción Inédita")
     descripcion = models.TextField(blank=True, null=True, help_text="Breve descripción de la categoría")
-    activa = models.BooleanField(default=True, help_text="Desmarcar para cerrar las votaciones de esta categoría")
-
+    activa = models.BooleanField(default=True, help_text="Desmarcar para cerrar las votaciones de esta categoría")  
+    
     def __str__(self):
         return self.nombre
 
@@ -32,4 +50,3 @@ class Voto(models.Model):
         return f"Voto de {self.usuario.username} en {self.categoria.nombre}"
         
         
-# Create your models here.
